@@ -1,0 +1,5 @@
+project_id = "sada-seed-2025-sandbox"
+region = "us-central1"
+service_name = "usecase4-webapp"
+domain_name = "usecase4.xyz"
+cloud_run_service_name = "usecase4-webapp-dev"

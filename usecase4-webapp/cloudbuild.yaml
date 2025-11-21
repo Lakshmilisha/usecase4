@@ -1,0 +1,76 @@
+
+substitutions:
+  _REGION: "us-central1"
+  _REPO_NAME: "docker-usecase4-dev"
+  _SERVICE_NAME: "usecase4-webapp-dev"
+  _BUCKET: "usecase4-build-counter"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  
+
+steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: init-counter
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gsutil stat gs://${_BUCKET}/counter.txt >/dev/null 2>&1 || \
+        echo "1" | gsutil cp - gs://${_BUCKET}/counter.txt
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: increment-counter
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        COUNTER=$$(gsutil cat gs://${_BUCKET}/counter.txt)
+        NEW_COUNTER=$$((COUNTER + 1))
+        echo "$$NEW_COUNTER" | gsutil cp - gs://${_BUCKET}/counter.txt
+        printf "usecase4-dev-build-%03d" "$$NEW_COUNTER" > /workspace/image_tag.txt
+        echo "Generated tag: $$(cat /workspace/image_tag.txt)"
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build-image
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        TAG=$$(cat /workspace/image_tag.txt)
+        docker build \
+          --cache-from ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_SERVICE_NAME}:latest \
+          -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_SERVICE_NAME}:$$TAG \
+          -t ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_SERVICE_NAME}:latest \
+          .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-image
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        TAG=$$(cat /workspace/image_tag.txt)
+        docker push ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_SERVICE_NAME}:$$TAG
+        docker push ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_SERVICE_NAME}:latest
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: deploy
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        TAG=$$(cat /workspace/image_tag.txt)
+        gcloud run deploy ${_SERVICE_NAME} \
+          --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_SERVICE_NAME}:$$TAG \
+          --region=${_REGION} \
+          --platform=managed \
+          --allow-unauthenticated \
+          --service-account=cloudrun-usecase4-dev-sa@sada-seed-2025-sandbox.iam.gserviceaccount.com \
+          --quiet
+
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO_NAME}/${_SERVICE_NAME}'
+
+timeout: '600s'
+
