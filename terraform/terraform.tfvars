@@ -1,4 +1,5 @@
 #terraform.tfvars
+
 project_id               = "sada-seed-2025-sandbox"
 cloudbuild_sa_email      = "cloudbuild-usecase4-dev-sa@sada-seed-2025-sandbox.iam.gserviceaccount.com"
 cloudrun_sa_email        = "cloudrun-usecase4-dev-sa@sada-seed-2025-sandbox.iam.gserviceaccount.com"
@@ -8,4 +9,4 @@ usecase_name             = "usecase4"
 repo_name                = "docker-usecase4-dev"
 service_name             = "usecase4-webapp-dev"
 tf_service_account_email = "sa-tf-usecase4@sada-seed-2025-sandbox.iam.gserviceaccount.com"
-environment = "dev"
+environment              = "dev"

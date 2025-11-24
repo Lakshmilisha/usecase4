@@ -1,7 +1,3 @@
-# variables.tf
-# Project and Region Configuration
-
-
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
@@ -13,10 +9,6 @@ variable "region" {
   type        = string
   default     = "us-central1"
 }
-
-
-# Naming Conventions and Identifiers
-
 
 variable "usecase_name" {
   description = "Unique use case identifier for tagging resources"
@@ -36,10 +28,6 @@ variable "service_name" {
   default     = "usecase4-webapp-dev"
 }
 
-
-# Service Accounts
-
-
 variable "tf_service_account_email" {
   description = "Email of the Terraform deployer service account"
   type        = string
@@ -54,10 +42,6 @@ variable "cloudrun_sa_email" {
   description = "Email of the manually created Cloud Run service account"
   type        = string
 }
-
-
-# GitHub Integration (for CI/CD triggers)
-
 
 variable "github_owner" {
   description = "GitHub username or organization that owns the repo"
@@ -74,4 +58,3 @@ variable "environment" {
   type        = string
   default     = "dev"
 }
-
