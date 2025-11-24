@@ -33,6 +33,7 @@ steps:
 
   - name: 'gcr.io/cloud-builders/docker'
     id: build-image
+    dir: 'usecase4-webapp'
     entrypoint: bash
     args:
       - -c
